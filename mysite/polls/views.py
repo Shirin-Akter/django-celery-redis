@@ -64,70 +64,23 @@ def about(request):
 def file_uplaod_view(request):
     if request.method == 'POST':
         form = UploadFileForm(request.POST, request.FILES)
-        # seri = DocumentSerializer(form)
-
-        # print('json print: ', seri.fields)
         # start of image
         myfile = request.FILES['document']
-
-
         if form.is_valid():
-            print('hello')
-            # file_path = os.path.join(settings.IMAGES_DIR, request.FILES['image_file'].name)
-            #form1.save()
-
-
-            # data = serializers.serialize('json', d)
-            # print('data serializers: ', data)
-
             this_entry = form.save(commit=False)
             file = this_entry.document
             name, extn = os.path.splitext((file.name))
-            # file1 = name + '.png'
-            # file.name = file1
-            # this_entry.document = file
             data = json.dumps(this_entry.description)
-            print('this is document: ', json.dumps(this_entry.document.name))
-            # file = this_entry.document
-            # name, extn = os.path.splitext((this_entry.document.name))
-            # this_entry.document = file
-            # this_entry.document.save(name + '{}.png', file)
-
-
-
-            # task = img_upload.delay(myfile, this_entry)
-
-            # x = json.dumps(this_entry.document)
             task = img_upload.delay(json.dumps(this_entry.document.name))
             file1 = task.get()
             file.name = file1
             this_entry.document = file
-            # task.save()
             print('this is celery task results: ', task.id , 'this is success: ', task.status, 'task get: ', task.get() )
-            # this_entry.document = file1
-            # name, extn = os.path.splitext((this_entry.document.name))
             this_entry.document.save(name + '{}.png', file)
             results = this_entry.save()
-
-
-
-
-            # this_entry.document.name --> split this , then upadate this
-            # this_entry.save()
-            # this_entry.document = img1.save('name'+".thumbnail", "JPEG")
-            print('this is udated entry ', vars(this_entry))
-            # print('this is udated11 entry ', type(this_entry.document) )
     else:
         form = UploadFileForm()
         return render(request, 'blog/file_upload_temp.html', {'form': form})
-#
-#
-#     name, extension = os.path.splitext(this_entry.document.name)
-#     print('extension: ',extension)
-#     print('name: ', name)
-#     print('this entry: ',this_entry)
-#     print('this entry document', this_entry.document)
-
     return HttpResponse('<p>Uploaded and printed to terminal</p>')
 
 
