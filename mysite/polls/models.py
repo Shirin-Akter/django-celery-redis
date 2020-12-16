@@ -20,4 +20,6 @@ class Document(models.Model):
     description = models.CharField(max_length=255, blank=True)
     # document = models.FileField(upload_to=None)
     document = models.FileField(upload_to=None, max_length=None)
+    digital_ocean_url = models.CharField(max_length=250, blank=True)
     uploaded_at = models.DateTimeField(auto_now_add=True)
+    print('insid documennt model')

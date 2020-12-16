@@ -7,4 +7,5 @@ class UploadFileForm(forms.ModelForm):
         model = Document
         #file = forms.FileField()
         fields = ('description' , 'document',)
+        print('inside forms')
 
