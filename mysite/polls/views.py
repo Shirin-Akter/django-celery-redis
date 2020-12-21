@@ -3,7 +3,7 @@ import os
 from io import BytesIO
 from ibm_watson import DiscoveryV1
 from ibm_watson import TextToSpeechV1
-import ibm_cloud_sdk_core.authenticators
+from ibm_cloud_sdk_core.authenticators import IAMAuthenticator
 
 
 from PIL import *
@@ -13,6 +13,7 @@ from django.core.files.storage import FileSystemStorage
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import render
 from django.views.decorators.csrf import csrf_exempt
+from ibm_watson.speech_to_text_v1 import SpeechToTextV1
 from rest_framework.decorators import api_view
 from rest_framework.parsers import JSONParser
 from rest_framework.response import Response
@@ -54,13 +55,9 @@ def home(request):
         'posts': posts
     }
     return render(request, 'blog/home.html', context)
-
-
 def about(request):
         form = UploadFileForm()
         return render(request, 'blog/file_upload_temp.html', {'form': form})
-    # return render(request, 'blog/about.html', {'title' : 'about title working!'})
-
 def file_uplaod_view(request):
     if request.method == 'POST':
         form = UploadFileForm(request.POST, request.FILES)
@@ -97,9 +94,6 @@ def file_uplaod_view(request):
         form = UploadFileForm()
         return render(request, 'blog/file_upload_temp.html', {'form': form})
     return HttpResponse('<p>Uploaded and printed to terminal</p>')
-
-
-
 @api_view(['GET', 'POST'])
 def api_detail_doc_view(request):
     if request.method == 'POST':
@@ -141,5 +135,34 @@ def api_detail_doc_view(request):
     return Response({'success': success})
 
 def text_to_speech(request):
+    if request.method == 'POST':
+        form = UploadFileForm(request.POST, request.FILES)
+        if form.is_valid():
+            form_data = form.save(commit=False)
+            file = form_data.document
+            description = form_data.description
+            url = "https://api.eu-gb.text-to-speech.watson.cloud.ibm.com/instances/b85a7740-98a7-430b-a122-208a75c00cd7"
+            apikey = "kkMD8MeGj8_EkNdbfrnwYCH9A6N6PtrQlT5ebEes3W3M"
+            # des is a form variable which will be fetched from the from data, for now its is hardcoded
+            des = 'text to speech'
+            if(des == 'text to speech'):
+                auth = IAMAuthenticator(apikey)
+                tts = TextToSpeechV1(authenticator=auth)
+                tts.set_service_url(url)
+                with open('C:/Dev/speech.mp3', 'wb') as audiofile:
+                    res = tts.synthesize('Hello ELS!', accept='audio/mp3', voice='en-US_AllisonV3Voice').get_result()
+                    audiofile.write(res.content)
 
-    return HttpResponse('hello')
+            else:
+                url = "https://api.eu-gb.speech-to-text.watson.cloud.ibm.com/instances/52b1609a-5ee1-49db-afbb-f748c7a67b01"
+                apikey = "gn1zMcCSMotsWUP3C0OvF7oZAKsrLVKkoeRRkvZbgBtd"
+                auth = IAMAuthenticator(apikey)
+                stt = SpeechToTextV1(authenticator=auth)
+                stt.set_service_url(url)
+                with open('C:/Dev/speech.mp3', 'rb') as file:
+                    res = stt.recognize(audio=file, content_type='audio/mp3', model='en-US_NarrowbandModel',
+                                        continuous=True).get_result()
+                text = res['results'][0]['alternatives'][0]['transcript']
+                confidence = res['results'][0]['alternatives'][0]['confidence']
+                with open('C:/Dev/speech_txt.txt', 'w') as out:
+                    out.writelines(text)
