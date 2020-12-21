@@ -10,5 +10,6 @@ urlpatterns = [
     path('about-us', views.about, name='about-page'),
     path('upload-file', views.file_uplaod_view, name='file-upload'),
     path('api-auth', views.api_detail_doc_view, name='rest_framework'),
+    path('tts', views.text_to_speech, name='tts'),
 
 ]

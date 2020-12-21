@@ -21,7 +21,7 @@ from rest_framework.response import Response
 from .forms import UploadFileForm
 from .models import Document
 from .serializers import DocumentSerializer
-from .tasks import img_upload
+from .tasks import img_upload, tts
 
 te = {'hello' : 'ruhi'}
 posts = [
@@ -90,6 +90,9 @@ def file_uplaod_view(request):
                 this_entry.document = file
                 this_entry.document.save(file.name, file)
                 results = this_entry.save()
+                ins = Document(digital_ocean_url = url)
+                print('this is ins: ', ins)
+                ins.save()
     else:
         form = UploadFileForm()
         return render(request, 'blog/file_upload_temp.html', {'form': form})
@@ -128,6 +131,7 @@ def api_detail_doc_view(request):
                 this_entry.document = file
                 this_entry.document.save(file.name, file)
                 results = this_entry.save()
+
     else:
         form1 = UploadFileForm()
         return render(request, 'blog/file_upload_temp.html', {'form': form1})
@@ -138,20 +142,26 @@ def text_to_speech(request):
     if request.method == 'POST':
         form = UploadFileForm(request.POST, request.FILES)
         if form.is_valid():
+            success = 'fail'
             form_data = form.save(commit=False)
-            file = form_data.document
-            description = form_data.description
-            url = "https://api.eu-gb.text-to-speech.watson.cloud.ibm.com/instances/b85a7740-98a7-430b-a122-208a75c00cd7"
-            apikey = "kkMD8MeGj8_EkNdbfrnwYCH9A6N6PtrQlT5ebEes3W3M"
+            # file = form_data.document
+            # description = form_data.description
+            # url = "https://api.eu-gb.text-to-speech.watson.cloud.ibm.com/instances/b85a7740-98a7-430b-a122-208a75c00cd7"
+            # apikey = "kkMD8MeGj8_EkNdbfrnwYCH9A6N6PtrQlT5ebEes3W3M"
             # des is a form variable which will be fetched from the from data, for now its is hardcoded
             des = 'text to speech'
             if(des == 'text to speech'):
-                auth = IAMAuthenticator(apikey)
-                tts = TextToSpeechV1(authenticator=auth)
-                tts.set_service_url(url)
-                with open('C:/Dev/speech.mp3', 'wb') as audiofile:
-                    res = tts.synthesize('Hello ELS!', accept='audio/mp3', voice='en-US_AllisonV3Voice').get_result()
-                    audiofile.write(res.content)
+                task = tts.delay()
+                res1 = task.get()
+                success = task.status
+                print('this is res1: ', res1)
+
+                # auth = IAMAuthenticator(apikey)
+                # tts = TextToSpeechV1(authenticator=auth)
+                # tts.set_service_url(url)
+                # with open('C:/Dev/speechV1.mp3', 'wb') as audiofile:
+                #     res = tts.synthesize('Hello ELS!', accept='audio/mp3', voice='en-US_AllisonV3Voice').get_result()
+                #     audiofile.write(res.content)
 
             else:
                 url = "https://api.eu-gb.speech-to-text.watson.cloud.ibm.com/instances/52b1609a-5ee1-49db-afbb-f748c7a67b01"
@@ -166,3 +176,8 @@ def text_to_speech(request):
                 confidence = res['results'][0]['alternatives'][0]['confidence']
                 with open('C:/Dev/speech_txt.txt', 'w') as out:
                     out.writelines(text)
+
+    else:
+        form1 = UploadFileForm()
+        return render(request, 'blog/file_upload_temp.html', {'form': form1})
+    return HttpResponse(success)

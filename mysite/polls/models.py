@@ -22,3 +22,5 @@ class Document(models.Model):
     document = models.FileField(upload_to=None, max_length=None)
     digital_ocean_url = models.CharField(max_length=250, blank=True)
     uploaded_at = models.DateTimeField(auto_now_add=True)
+    def __str__(self):
+        return self.digital_ocean_url

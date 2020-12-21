@@ -7,6 +7,8 @@ import os
 from django.core.files import File
 import string
 import json
+from ibm_watson import TextToSpeechV1
+from ibm_cloud_sdk_core.authenticators import IAMAuthenticator
 
 @shared_task
 def adding_task(x, y):
@@ -33,3 +35,16 @@ def img_upload(data):
         return data1
     else:
         return data
+
+
+@shared_task
+def tts():
+    url = "https://api.eu-gb.text-to-speech.watson.cloud.ibm.com/instances/b85a7740-98a7-430b-a122-208a75c00cd7"
+    apikey = "kkMD8MeGj8_EkNdbfrnwYCH9A6N6PtrQlT5ebEes3W3M"
+    auth = IAMAuthenticator(apikey)
+    tts = TextToSpeechV1(authenticator=auth)
+    tts.set_service_url(url)
+    with open('C:/Dev/speechV1.mp3', 'wb') as audiofile:
+        res = tts.synthesize('Experience learning takes its cue from games as well as traditional education and can be non-linear and self-managed by the student. Deliver learning experiences via the cloud across all devices, from VR headsets to mobile phone apps, wherever your learners are.', accept='audio/mp3', voice='en-US_AllisonV3Voice').get_result()
+        audiofile.write(res.content)
+    return url
