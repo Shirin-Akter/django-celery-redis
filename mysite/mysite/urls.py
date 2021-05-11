@@ -14,11 +14,12 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.contrib import admin
-from django.urls import path,include
+from django.urls import path,include, re_path
 from django.conf import settings
 from django.conf.urls.static import static
 from rest_framework import routers
-# from polls.views import *
+#from polls.views import *
+from polls.views import *
 
 
 
@@ -29,7 +30,11 @@ from rest_framework import routers
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('accounts/', include('django.contrib.auth.urls')),
     path('', include('polls.urls')),
+    # re_path(r'^test/(?P<endpoint_id>[0-9]+)/$',Addressables.as_view()),
+    path('test/<int:uid>/', Addressables.as_view(), name='pi'),
+    path('test/', Addressables.as_view()),
     # URLS FOR REST FRAMEWORK
     # path('', include(router.urls)),
     # path('api-auth/', include('rest_framework.urls', namespace='rest_framework'))

@@ -45,6 +45,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'storages',
     'rest_framework',
+    'ckeditor',
 ]
 
 MIDDLEWARE = [
@@ -62,7 +63,7 @@ ROOT_URLCONF = 'mysite.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [str(BASE_DIR.joinpath('templates'))],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -160,7 +161,7 @@ CACHES = {
 # DEFAULT_FILE_STORAGE = 'custom_storages.MediaStorage'
 
 STATIC_URL = 'https://%s/%s/' % (AWS_S3_ENDPOINT_URL, AWS_LOCATION)
-STATIC_ROOT = 'static/'
+STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 
 MEDIA_URL = '{}/{}/'.format(CDN_HOST, 'media')
 MEDIA_ROOT = 'media/'
@@ -185,3 +186,18 @@ CELERY_TASK_TRACK_STARTED = True
 #
 #MEDIA_ROOT = 'C:/Dev/python-test/mysite/mysite/media'
 # MEDIA_URL = 'media/'
+
+# config/settings.py
+LOGIN_REDIRECT_URL = '/'
+CKEDITOR_BASEPATH = "/static/ckeditor/ckeditor/"
+CKEDITOR_UPLOAD_PATH = "uploads/"
+#ckeditor configs #todo
+CKEDITOR_CONFIGS = {
+   'default': {
+        'toolbar':[ ['CodeSnippet', ], ],
+        'height': 400,
+        'width': 900,
+        'removePlugins': 'stylesheetparser',
+        'extraPlugins': 'codesnippet',
+   },
+}
